@@ -1,0 +1,52 @@
+services:
+  miniflux:
+    container_name: "miniflux"
+    image: miniflux/miniflux:latest
+    ports:
+      - "8001:8080"
+    environment:
+      - DATABASE_URL=postgres://miniflux:${MF_DB_PASSWORD}@db/miniflux?sslmode=disable
+      - POLLING_SCHEDULER=entry_frequency
+      - CLEANUP_ARCHIVE_UNREAD_DAYS=-1
+      - RUN_MIGRATIONS=1
+      - CREATE_ADMIN=1
+      - ADMIN_USERNAME=${MF_ADMIN_USER}
+      - ADMIN_PASSWORD=${MF_ADMIN_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  linkding:
+    container_name: "linkding"
+    image: sissbruecker/linkding:latest
+    ports:
+      - "8002:9090"
+    environment:
+      - LD_SUPERUSER_NAME=${LD_ADMIN_USER}
+      - LD_SUPERUSER_PASSWORD=${LD_ADMIN_PASSWORD}
+      - LD_DB_ENGINE=postgres
+      - LD_DB_USER=linkding
+      - LD_DB_PASSWORD=${LD_DB_PASSWORD}
+      - LD_DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  db:
+    container_name: "db"
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - MF_PASSWORD=${MF_DB_PASSWORD}
+      - LD_PASSWORD=${LD_DB_PASSWORD}
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./init.sh:/docker-entrypoint-initdb.d/init.sh
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s
+volumes:
+  db:
