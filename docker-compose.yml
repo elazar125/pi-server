@@ -32,6 +32,28 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+  gitea:
+    container_name: "gitea"
+    image: strobi/rpi-gitea:latest
+    volumes:
+      - gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8003:3000"
+      - "2200:22"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=db:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=${GT_DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
   db:
     container_name: "db"
     image: postgres:15
@@ -40,6 +62,7 @@ services:
       - POSTGRES_PASSWORD=${PG_PASSWORD}
       - MF_PASSWORD=${MF_DB_PASSWORD}
       - LD_PASSWORD=${LD_DB_PASSWORD}
+      - GT_PASSWORD=${GT_DB_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
       - ./init.sh:/docker-entrypoint-initdb.d/init.sh
@@ -50,3 +73,4 @@ services:
       start_period: 30s
 volumes:
   db:
+  gitea:

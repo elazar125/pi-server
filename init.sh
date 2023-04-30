@@ -9,4 +9,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
   CREATE USER linkding PASSWORD '${LD_PASSWORD}';
   CREATE DATABASE linkding OWNER linkding;
   GRANT ALL PRIVILEGES ON DATABASE linkding TO linkding;
+
+  CREATE USER gitea PASSWORD '${GT_PASSWORD}';
+  CREATE DATABASE gitea OWNER gitea;
+  GRANT ALL PRIVILEGES ON DATABASE gitea TO gitea;
 EOSQL

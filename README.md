@@ -24,4 +24,15 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 ```
 
+UFW
+```bash
+sudo apt install ufw
+sudo ufw limit 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw enable
+```
+
 Remember to copy additional ssh public keys to `~/.ssh/authorized_keys`
